@@ -1,0 +1,27 @@
+{
+  "name": "inhere/lite-cache",
+  "type": "library",
+  "description": "a simple cache client tool library of the php",
+  "keywords": ["library", "memcache", "redis"],
+  "homepage": "https://github.com/inhere/php-lite-cache",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "inhere",
+      "email": "in.798@qq.com",
+      "homepage": "http://www.yzone.net/"
+    }
+  ],
+  "require": {
+    "php": ">=7.0.0",
+    "psr/simple-cache": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Inhere\\Web\\" : "src/"
+    }
+  },
+  "suggest": {
+    "inhere/simple-print-tool": "Very lightweight data printing tools"
+  }
+}
