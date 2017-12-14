@@ -8,16 +8,12 @@
 
 namespace Inhere\LiteCache;
 
-use Inhere\Exceptions\ConnectionException;
-use Inhere\Exceptions\UnknownMethodException;
-use Inhere\Library\Traits\LiteConfigTrait;
+use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
 use Inhere\Library\Traits\LiteEventTrait;
-use Redis;
 
 /**
  * Class RedisClient
  * @package Inhere\LiteCache
- *
  * All the commands exposed by the client generally have the same signature as
  * described by the Redis documentation, but some of them offer an additional
  * and more friendly interface to ease programming which is described in the
@@ -172,9 +168,9 @@ use Redis;
  * @method array  geoRadius($key, $longitude, $latitude, $radius, $unit, array $options = null)
  * @method array  geoRadiusByMember($key, $member, $radius, $unit, array $options = null)
  */
-class RedisClient
+class ExtendedRedis
 {
-    use LiteEventTrait, LiteConfigTrait;
+    use BasicRedisAwareTrait, LiteEventTrait;
 
     // ARGS: ($name, $mode, $config)
     const CONNECT = 'redis.connect';
@@ -185,167 +181,25 @@ class RedisClient
     // ARGS: ($method, array $data)
     const AFTER_EXECUTE = 'redis.afterExecute';
 
-    /**
-     * @var Redis
-     */
-    private $redis;
-
-    /**
-     * @var array
-     */
-    private $config = [
-        'host' => '127.0.0.1',
-        'port' => 6379,
-        'timeout' => 0.0,
-        'database' => 0,
-        'prefix' => 'RDS_',
-
-        'password' => null,
-        'persistent' => false,
-
-        'options' => [],
-    ];
-
-    /**
-     * @param array $config
-     * @return static
-     * @throws \RuntimeException
-     */
-    public static function make(array $config = [])
+    protected function onConnect()
     {
-        return new static($config);
-    }
-
-    /**
-     * @param array $config
-     * @throws \RuntimeException
-     */
-    public function __construct(array $config = [])
-    {
-        if (!self::isSupported()) {
-            throw new \RuntimeException("The php extension 'redis' is required.");
-        }
-
-        $this->setConfig($config);
-    }
-
-    /**
-     * @return bool
-     */
-    public static function isSupported()
-    {
-        return class_exists(\Redis::class, false);
-    }
-
-    /**
-     * @return $this
-     * @throws ConnectionException
-     */
-    public function connect()
-    {
-        if ($this->redis) {
-            return $this;
-        }
-
-        try {
-            $config = $this->config;
-            $client = new \Redis();
-            $client->connect($config['host'], (int)$config['port'], $config['timeout']);
-
-            if ($config['password'] && !$client->auth($config['password'])) {
-                throw new \RuntimeException('Auth failed on connect to the redis server.');
-            }
-
-            if ($config['database'] >= 0) {
-                $client->select((int)$config['database']);
-            }
-
-            $options = $config['options'] ?? [];
-
-            foreach ($options as $name => $value) {
-                $client->setOption($name, $value);
-            }
-
-            $this->redis = $client;
-        } catch (\Throwable $e) {
-            throw new ConnectionException("Connect error: {$e->getMessage()}");
-        }
         $this->fire(self::CONNECT, [$this]);
-
-        return $this;
     }
 
-    /**
-     * reconnect
-     * @throws \Inhere\Exceptions\ConnectionException
-     */
-    public function reconnect()
-    {
-        $this->redis = null;
-        $this->connect();
-    }
-
-    /**
-     * disconnect
-     */
-    public function disconnect()
+    protected function onDisconnect()
     {
         $this->fire(self::DISCONNECT, [$this]);
-        $this->redis = null;
     }
 
-
-    /**
-     * @param string $method
-     * @param array $args
-     * @return mixed
-     * @throws \Inhere\Exceptions\ConnectionException
-     * @throws UnknownMethodException
-     */
-    public function __call($method, array $args)
+    protected function onBeforeExecute($method, $args)
     {
-        return $this->call($method, ...$args);
+        $this->fire(self::BEFORE_EXECUTE, [$method, $args]);
     }
 
-    /**
-     * @param string $method
-     * @param array $args
-     * @return mixed
-     * @throws \Inhere\Exceptions\ConnectionException
-     * @throws UnknownMethodException
-     */
-    public function call($method, ...$args)
+    protected function onAfterExecute($method, $args, $ret)
     {
-        $this->connect();
-        $upperMethod = strtoupper($method);
-
-        // exists
-        if (\method_exists($this->redis, $upperMethod)) {
-            // trigger before event (read)
-            $this->fire(self::BEFORE_EXECUTE, [$upperMethod, $args]);
-
-            $ret = $this->redis->$upperMethod(...$args);
-
-            // trigger after event (read)
-            $this->fire(self::AFTER_EXECUTE, [$upperMethod, ['args' => $args, 'ret' => $ret]]);
-
-            return $ret;
-        }
-
-        throw new UnknownMethodException("Call the redis command method [$method] don't exists!");
+        $this->fire(self::AFTER_EXECUTE, [$method, $args, $ret]);
     }
-
-    /**
-     * __destruct
-     */
-    public function __destruct()
-    {
-        $this->disconnect();
-    }
-
-    /**************************************************************************
-     * basic method
-     *************************************************************************/
 
     /**
      * redis 中 key 是否存在
@@ -447,6 +301,7 @@ class RedisClient
             }
             /** @var array $result */
             $result = (array)$rds->exec();
+
             return array_sum($result);
         }
 
@@ -698,7 +553,7 @@ class RedisClient
      */
     public function addCache($key, $value, $seconds = 3600)
     {
-        $key = $this->getKey($key);
+        $key = $this->getCacheKey($key);
 
         // return $this->set($key, serialize($value), 'EX', $seconds, 'NX');
         return $this->exists($key) ? true : $this->setCache($key, $value, $seconds);
@@ -713,7 +568,8 @@ class RedisClient
      */
     public function setCache($key, $value, $seconds = 3600)
     {
-        $key = $this->getKey($key);
+        $key = $this->getCacheKey($key);
+
         // return $this->set($key, serialize($value), 'EX', $seconds);
         return $this->setEx($key, $seconds, serialize($value));
     }
@@ -725,9 +581,18 @@ class RedisClient
      */
     public function getCache($key, $default = null)
     {
-        $key = $this->getKey($key);
+        $key = $this->getCacheKey($key);
 
         return ($data = $this->get($key)) ? unserialize($data, []) : $default;
+    }
+
+    /**
+     * @param $key
+     * @return int
+     */
+    public function hasCache($key)
+    {
+        return $this->exists($this->getCacheKey($key));
     }
 
     /**
@@ -736,7 +601,7 @@ class RedisClient
      */
     public function delCache($key)
     {
-        $key = $this->getKey($key);
+        $key = $this->getCacheKey($key);
         $data = $this->get($key);
         $this->del($key);
 
@@ -747,7 +612,7 @@ class RedisClient
      * @param $key
      * @return string
      */
-    public function getKey($key)
+    public function getCacheKey($key)
     {
         return $this->config['prefix'] . $key;
     }
@@ -755,15 +620,6 @@ class RedisClient
     /**************************************************************************
      * getter/setter
      *************************************************************************/
-
-    /**
-     * get Connection
-     * @return \Redis
-     */
-    public function getRedis()
-    {
-        return $this->redis;
-    }
 
     /**
      * @param null|string $section

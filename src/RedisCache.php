@@ -8,25 +8,78 @@
 
 namespace Inhere\LiteCache;
 
+use Inhere\Exceptions\ConnectionException;
+use Inhere\Library\Traits\LiteEventTrait;
+use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
+use Inhere\LiteCache\Traits\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class RedisCache
  * @package Inhere\LiteCache
+ * @method int exists($key)
  */
 class RedisCache implements CacheInterface
 {
+    use BasicRedisAwareTrait, DataParserAwareTrait, LiteEventTrait;
+
+    // ARGS: ($name, $mode, $config)
+    const CONNECT = 'redis.connect';
+    // ARGS: ($name, $mode)
+    const DISCONNECT = 'redis.disconnect';
+    // ARGS: ($method, array $args)
+    const BEFORE_EXECUTE = 'redis.beforeExecute';
+    // ARGS: ($method, array $data)
+    const AFTER_EXECUTE = 'redis.afterExecute';
+
+    /** @var bool Refresh current request cache. */
+    private $refresh = false;
+
+    /**************************************************************************
+     * basic method
+     *************************************************************************/
+
     /**
-     * @var \Redis
+     * @param string $key
+     * @return string
      */
-    private $redis;
+    public function getCacheKey($key)
+    {
+        return $this->config['prefix'] . $key;
+    }
+
+    /**
+     * redis 中 key 是否存在
+     * @param string $key
+     * @return bool
+     */
+    public function hasKey($key)
+    {
+        return $this->call('exists', $key);
+    }
+
+    /**************************************************************************
+     * interface methods
+     *************************************************************************/
 
     /**
      * {@inheritdoc}
      */
     public function get($key, $default = null)
     {
+        if (!$key || !$this->isRefresh()) {
+            return $default;
+        }
 
+        $key = $this->getCacheKey($key);
+
+        if ($this->call('exists', $key)) {
+            $result = $this->call('get', $key);
+
+            return $this->getParser()->decode($result);
+        }
+
+        return $default;
     }
 
     /**
@@ -34,15 +87,30 @@ class RedisCache implements CacheInterface
      */
     public function set($key, $value, $ttl = null)
     {
+        if (!$key) {
+            return false;
+        }
 
+        $key = $this->getCacheKey($key);
+        $value = $this->getParser()->encode($value);
+
+        return $this->call('set', $key, $value, $ttl);
     }
 
     /**
-     * {@inheritdoc}
+     * @param string $key
+     * @return bool
+     * @throws ConnectionException
      */
     public function delete($key)
     {
+        if (!$key) {
+            return false;
+        }
 
+        $key = $this->getCacheKey($key);
+
+        return $this->call('del', $key) > 0;
     }
 
     /**
@@ -50,7 +118,7 @@ class RedisCache implements CacheInterface
      */
     public function clear()
     {
-
+        return $this->call('flushDB');
     }
 
     /**
@@ -58,11 +126,27 @@ class RedisCache implements CacheInterface
      */
     public function has($key)
     {
+        if (!$key) {
+            return false;
+        }
 
+        $key = $this->getCacheKey($key);
+
+        return $this->call('exists', $key);
+    }
+
+    /**
+     * alias of the `getMultiple`
+     * {@inheritdoc}
+     */
+    public function getMulti($keys, $default = null)
+    {
+        return $this->getMultiple($keys, $default);
     }
 
     /**
      * Obtains multiple cache items by their unique keys.
+     * @see \Redis::getMultiple()
      * @param iterable $keys A list of keys that can obtained in a single operation.
      * @param mixed $default Default value to return for keys that do not exist.
      * @return iterable A list of key => value pairs. Cache keys that do not exist or are stale will have $default as value.
@@ -72,13 +156,33 @@ class RedisCache implements CacheInterface
      */
     public function getMultiple($keys, $default = null)
     {
-        $list = [];
-
-        foreach ($keys as $key) {
-
+        if (!$keys || !$this->isRefresh()) {
+            return [];
         }
 
-        return $list;
+        $values = [];
+        $keyList = array_map(function ($key) {
+            return $this->getCacheKey($key);
+        }, $keys);
+
+        /** @var array $results */
+        $results = $this->call('getMultiple', $keyList);
+
+        foreach ($results as $idx => $value) {
+            $key = $keys[$idx];
+            $values[$key] = $value === false ? $default : $this->getParser()->decode($value);
+        }
+
+        return $values;
+    }
+
+    /**
+     * alias of the `setMultiple`
+     * {@inheritdoc}
+     */
+    public function setMulti($values, $ttl = null)
+    {
+        return $this->setMultiple($values, $ttl);
     }
 
     /**
@@ -94,7 +198,19 @@ class RedisCache implements CacheInterface
      */
     public function setMultiple($values, $ttl = null)
     {
-        // TODO: Implement setMultiple() method.
+        /** @var \Redis $rds */
+        $rds = $this->call('multi');
+
+        foreach ($values as $key => $value) {
+            $key = $this->getCacheKey($key);
+            $value = $this->getParser()->encode($value);
+
+            $rds->setex($key, $ttl, $value);
+        }
+
+        $result = (array)$rds->exec();
+
+        return \count($result) > 0;
     }
 
     /**
@@ -107,6 +223,50 @@ class RedisCache implements CacheInterface
      */
     public function deleteMultiple($keys)
     {
-        // TODO: Implement deleteMultiple() method.
+        $keyList = array_map(function ($key) {
+            return $this->getCacheKey($key);
+        }, $keys);
+
+        return $this->call('del', $keyList) > 0;
+    }
+
+    /**************************************************************************
+     * extends method
+     *************************************************************************/
+
+    /**
+     * @return bool
+     */
+    public function isRefresh(): bool
+    {
+        return $this->refresh;
+    }
+
+    /**
+     * @param bool $refresh
+     */
+    public function setRefresh($refresh)
+    {
+        $this->refresh = (bool)$refresh;
+    }
+
+    protected function onConnect()
+    {
+        $this->fire(self::CONNECT, [$this]);
+    }
+
+    protected function onDisconnect()
+    {
+        $this->fire(self::DISCONNECT, [$this]);
+    }
+
+    protected function onBeforeExecute($method, $args)
+    {
+        $this->fire(self::BEFORE_EXECUTE, [$method, $args]);
+    }
+
+    protected function onAfterExecute($method, $args, $ret)
+    {
+        $this->fire(self::AFTER_EXECUTE, [$method, $args, $ret]);
     }
 }
