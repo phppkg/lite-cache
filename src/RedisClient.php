@@ -177,13 +177,13 @@ class RedisClient
     use LiteEventTrait, LiteConfigTrait;
 
     // ARGS: ($name, $mode, $config)
-    const CONNECT = 'connect';
+    const CONNECT = 'redis.connect';
     // ARGS: ($name, $mode)
-    const DISCONNECT = 'disconnect';
+    const DISCONNECT = 'redis.disconnect';
     // ARGS: ($method, array $args)
-    const BEFORE_EXECUTE = 'beforeExecute';
+    const BEFORE_EXECUTE = 'redis.beforeExecute';
     // ARGS: ($method, array $data)
-    const AFTER_EXECUTE = 'afterExecute';
+    const AFTER_EXECUTE = 'redis.afterExecute';
 
     /**
      * @var Redis
@@ -195,12 +195,13 @@ class RedisClient
      */
     private $config = [
         'host' => '127.0.0.1',
-        'port' => '6379',
+        'port' => 6379,
         'timeout' => 0.0,
         'database' => 0,
         'prefix' => 'RDS_',
 
         'password' => null,
+        'persistent' => false,
 
         'options' => [],
     ];

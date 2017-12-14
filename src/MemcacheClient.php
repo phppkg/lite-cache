@@ -16,7 +16,6 @@ use Inhere\Library\Traits\TraitUseOption;
  * Class MemcacheClient
  * support \Memcache and \Memcached extension
  * @package Inhere\LiteCache
- * @method connect()
  * @method string getVersion() 获取服务器池中所有服务器的版本信息
  */
 class MemcacheClient
@@ -76,13 +75,13 @@ class MemcacheClient
         }
 
         // do connection
-        $this->connection();
+        $this->connect();
     }
 
     /**
      * @return bool
      */
-    public function connection()
+    public function connect()
     {
         $servers = $this->getOption('servers', []);
 
@@ -206,7 +205,7 @@ class MemcacheClient
      * @param $key
      * @return bool
      */
-    public function exists($key)
+    public function has($key)
     {
         return (bool)$this->get($key);
     }
@@ -538,15 +537,15 @@ class MemcacheClient
      * @param $method
      * @param $args
      * @return mixed
-     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function __call($method, $args)
     {
         if (method_exists($this->driver, $method)) {
-            return \call_user_func_array([$this->driver, $method], $args);
+            return $this->driver->$method(...$args);
         }
 
-        throw new \LogicException("Call a not exists method: $method");
+        throw new \InvalidArgumentException("Call a not exists method: $method");
     }
 
     /**
@@ -589,26 +588,3 @@ class MemcacheClient
         throw new \RuntimeException("Setting a not exists property: $name");
     }
 }
-
-
-/**
- * Memcache::connect();
- * Memcache::pconnect(); 长链接
- * Memcache::close(); 关闭对象（对常链接不起作用）
- * Memcache::addServer(); 向对象添加一个服务器
- * Memcache::add() 添加一个要缓存的数据如果作为这个缓存的数据在键在服务器上还不存在的情况下
- * Memcache::replace() 替换一个指定已存在key的缓存变量内容
- * Memcache::set 设置一个指定key的缓存变量内容
- * Memcache::get() 获取某个key的变量缓存值
- * Memcache::delete() 删除某个变量的缓存
- * Memcache::flush() 清空所缓存内容，不是真的删除缓存的内容，只是使所有变量的缓存过期，使内存中的内容被重写
- * Memcache::getExtendedStats() 获取所有服务器扩展静态信息
- * Memcache::getStats(); 获取最后添加服务器静态信息
- * Memcache::getServerStatus() 通过输入的host及port来获取相应的服务器信息
- * Memcache::getVersion() 获取服务器的版本号信息
- * Memcache::setCompressThreshold 设置压缩级根
- * Memcache::setServerParams   Memcache version 2.1.0后增加的函数，运行时设置服务器参数
- * Memcache::increment  给指定kye的缓存变量一个增值，如查该变量不是数字时不会被转化为数字
- * Memcache::decrement
- * //给指定key的缓存变量一个递减值，与increment操作类拟，将在原有变量基础上减去这个值，该项的值将会在转化为数字后减去，新项的值不会小于0，对于压缩的变量不要使用本函数因为相应的取值方法会失败
- */
