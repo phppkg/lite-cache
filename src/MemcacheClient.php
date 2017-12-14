@@ -7,7 +7,7 @@
  * @from http://www.open-open.com/lib/view/open1372842855097.html
  */
 
-namespace Inhere\Library\Components;
+namespace Inhere\LiteCache;
 
 use Inhere\Exceptions\NotFoundException;
 use Inhere\Library\Traits\TraitUseOption;
@@ -15,11 +15,11 @@ use Inhere\Library\Traits\TraitUseOption;
 /**
  * Class MemcacheClient
  * support \Memcache and \Memcached extension
- * @package Inhere\Library\Utils
+ * @package Inhere\LiteCache
  * @method connect()
  * @method string getVersion() 获取服务器池中所有服务器的版本信息
  */
-class MemcacheClient // extends AbstractCacheDriver
+class MemcacheClient
 {
     use TraitUseOption;
 

@@ -6,7 +6,7 @@
  * Time: 18:58
  */
 
-namespace Inhere\Library\Components;
+namespace Inhere\LiteCache;
 
 use Inhere\Exceptions\ConnectionException;
 use Inhere\Exceptions\UnknownMethodException;
@@ -16,7 +16,7 @@ use Redis;
 
 /**
  * Class RedisClient
- * @package App\Componets
+ * @package Inhere\LiteCache
  *
  * All the commands exposed by the client generally have the same signature as
  * described by the Redis documentation, but some of them offer an additional
