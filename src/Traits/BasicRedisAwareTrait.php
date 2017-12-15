@@ -8,8 +8,8 @@
 
 namespace Inhere\LiteCache\Traits;
 
-use Inhere\Exceptions\ConnectionException;
-use Inhere\Library\Traits\LiteConfigTrait;
+use Inhere\LiteCache\ConnectionException;
+use Inhere\LiteCache\InvalidArgumentException;
 
 /**
  * Trait BasicRedisAwareTrait
@@ -17,7 +17,7 @@ use Inhere\Library\Traits\LiteConfigTrait;
  */
 trait BasicRedisAwareTrait
 {
-    use LiteConfigTrait;
+    use ConfigAndEventAwareTrait;
 
     /**
      * @var \Redis
@@ -61,6 +61,14 @@ trait BasicRedisAwareTrait
         }
 
         $this->setConfig($config);
+    }
+
+    /**
+     * __destruct
+     */
+    public function __destruct()
+    {
+        $this->disconnect();
     }
 
     /**
@@ -132,7 +140,6 @@ trait BasicRedisAwareTrait
 
     /**
      * reconnect
-     * @throws ConnectionException
      */
     public function reconnect()
     {
@@ -153,22 +160,18 @@ trait BasicRedisAwareTrait
      * @param string $method
      * @param array $args
      * @return mixed
-     * @throws ConnectionException
-     * @throws \InvalidArgumentException
      */
     public function __call($method, array $args)
     {
-        return $this->call($method, ...$args);
+        return $this->execute($method, ...$args);
     }
 
     /**
      * @param string $method
      * @param array $args
      * @return mixed
-     * @throws ConnectionException
-     * @throws \InvalidArgumentException
      */
-    public function call($method, ...$args)
+    public function execute($method, ...$args)
     {
         $this->connect();
         $upperMethod = strtoupper($method);
@@ -186,15 +189,7 @@ trait BasicRedisAwareTrait
             return $ret;
         }
 
-        throw new \InvalidArgumentException("Call the redis command method [$method] don't exists!");
-    }
-
-    /**
-     * __destruct
-     */
-    public function __destruct()
-    {
-        $this->disconnect();
+        throw new InvalidArgumentException("Call the redis command method [$method] don't exists!");
     }
 
     /**

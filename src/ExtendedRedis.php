@@ -9,7 +9,6 @@
 namespace Inhere\LiteCache;
 
 use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
-use Inhere\Library\Traits\LiteEventTrait;
 
 /**
  * Class RedisClient
@@ -170,7 +169,7 @@ use Inhere\Library\Traits\LiteEventTrait;
  */
 class ExtendedRedis
 {
-    use BasicRedisAwareTrait, LiteEventTrait;
+    use BasicRedisAwareTrait;
 
     // ARGS: ($name, $mode, $config)
     const CONNECT = 'redis.connect';

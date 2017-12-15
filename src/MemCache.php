@@ -9,8 +9,7 @@
 
 namespace Inhere\LiteCache;
 
-use Inhere\Exceptions\NotFoundException;
-use Inhere\Library\Traits\TraitUseOption;
+use Inhere\LiteCache\Traits\ConfigAndEventAwareTrait;
 use Inhere\LiteCache\Traits\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 
@@ -22,7 +21,7 @@ use Psr\SimpleCache\CacheInterface;
  */
 class MemCache implements CacheInterface
 {
-    use DataParserAwareTrait, TraitUseOption;
+    use DataParserAwareTrait, ConfigAndEventAwareTrait;
 
     const KEYS_MAP_PREFIX = '_keys_map_';
 
@@ -53,7 +52,7 @@ class MemCache implements CacheInterface
     /**
      * @var array
      */
-    protected $options = [
+    protected $config = [
         'prefix' => 'MEM_',
 
         'servers' => [
@@ -67,51 +66,108 @@ class MemCache implements CacheInterface
     ];
 
     /**
-     * MemcacheDriver constructor.
-     * @param array $options
-     * @throws NotFoundException
+     * class constructor.
+     * @param array $config
+     * @throws \RuntimeException
      */
-    public function __construct(array $options = [])
+    public function __construct(array $config = [])
     {
-        $this->setOptions($options, 1);
+        $this->checkEnvironment();
 
-        if (class_exists('Memcached', false)) {
-            $this->driver = new \Memcached();
-            $this->driverName = 'Memcached';
-        } elseif (class_exists('Memcache', false)) {
-            $this->driver = new \Memcache();
-            $this->driverName = 'Memcache';
-        } else {
-            throw new NotFoundException("Please install the corresponding memcache extension, 'memcached'(recommended) or 'memcache'.");
-        }
+        $this->setConfig($config);
 
         // do connection
         $this->connect();
     }
 
     /**
-     * @return bool
+     * __destruct
+     */
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
+    /**
+     * @return $this
      */
     public function connect()
     {
-        $servers = $this->getOption('servers', []);
+        if ($this->driver) {
+            return $this;
+        }
 
+        $servers = $this->getConfig('servers', []);
+
+        // It is Memcached
         if ($this->isMemcached()) {
+            $this->driver = new \Memcached();
+            $this->fire(self::CONNECT, [$this]);
+
             return $this->driver->addServers($servers);
         }
+
+        $this->driver = new \Memcache();
 
         foreach ((array)$servers as $server) {
             $this->driver->addServer($server);
         }
 
-        return true;
+        $this->fire(self::CONNECT, [$this]);
+
+        return $this;
+    }
+
+    /**
+     * reconnect
+     */
+    public function reconnect()
+    {
+        $this->driver = null;
+        $this->connect();
+    }
+
+    /**
+     * disconnect
+     */
+    public function disconnect()
+    {
+        $this->fire(self::DISCONNECT, [$this]);
+        $this->driver = null;
+    }
+
+    /**
+     * @param string $method
+     * @param array $args
+     * @return mixed
+     * @throws InvalidArgumentException
+     */
+    public function __call($method, array $args)
+    {
+        return $this->execute($method, ...$args);
+    }
+
+    /**
+     * @param string $method
+     * @param array $args
+     * @return mixed
+     */
+    public function execute($method, ...$args)
+    {
+        $this->connect();
+
+        if (method_exists($this->driver, $method)) {
+            return $this->driver->$method(...$args);
+        }
+
+        throw new InvalidArgumentException("Call a not exists method: $method");
     }
 
     /**
      * @param array $config
      * @return bool
      */
-    public function addServerByConfig(array $config)
+    public function addServerByArray(array $config)
     {
         $cfg = array_merge([
             'host' => '127.0.0.1',
@@ -175,7 +231,7 @@ class MemCache implements CacheInterface
      */
     public function getCacheKey($key)
     {
-        return $this->options['prefix'] . $key;
+        return $this->getConfig('prefix') . $key;
     }
 
     /**
@@ -280,6 +336,7 @@ class MemCache implements CacheInterface
     /**
      * alias of the `getMultiple`
      * {@inheritdoc}
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getMulti($keys, $default = null)
     {
@@ -315,6 +372,7 @@ class MemCache implements CacheInterface
     /**
      * alias of the `setMultiple`
      * {@inheritdoc}
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function setMulti($values, $ttl = null)
     {
@@ -634,6 +692,17 @@ class MemCache implements CacheInterface
         return $listKeys;
     }
 
+    public function checkEnvironment()
+    {
+        if (\class_exists('Memcached', false)) {
+            $this->driverName = 'Memcached';
+        } elseif (\class_exists('Memcache', false)) {
+            $this->driverName = 'Memcache';
+        } else {
+            throw new \RuntimeException("Please install the memcache extension: 'memcached'(recommended) or 'memcache'.");
+        }
+    }
+
     /**************************************************************************
      * getter/setter method
      *************************************************************************/
@@ -679,64 +748,9 @@ class MemCache implements CacheInterface
     }
 
     /**
-     * @param $method
-     * @param $args
-     * @return mixed
-     * @throws \InvalidArgumentException
-     */
-    public function __call($method, $args)
-    {
-        if (method_exists($this->driver, $method)) {
-            return $this->driver->$method(...$args);
-        }
-
-        throw new \InvalidArgumentException("Call a not exists method: $method");
-    }
-
-    /**
-     * @param $name
      * @return bool
      */
-    public function __isset($name)
-    {
-        return property_exists($this, $name);
-    }
-
-    /**
-     * @param $name
-     * @return null|mixed
-     */
-    public function __get($name)
-    {
-        $getter = 'get' . ucfirst($name);
-
-        if (method_exists($this, $getter)) {
-            return $this->$getter();
-        }
-
-        return null;
-    }
-
-    /**
-     * @param string $name
-     * @param $value
-     * @throws \RuntimeException
-     */
-    public function __set(string $name, $value)
-    {
-        $setter = 'set' . ucfirst($name);
-
-        if (method_exists($this, $setter)) {
-            $this->$setter($name, $value);
-        }
-
-        throw new \RuntimeException("Setting a not exists property: $name");
-    }
-
-    /**
-     * @return bool
-     */
-    public function isRefresh(): bool
+    public function isRefresh()
     {
         return $this->refresh;
     }

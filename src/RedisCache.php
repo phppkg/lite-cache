@@ -8,8 +8,6 @@
 
 namespace Inhere\LiteCache;
 
-use Inhere\Exceptions\ConnectionException;
-use Inhere\Library\Traits\LiteEventTrait;
 use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
 use Inhere\LiteCache\Traits\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
@@ -21,7 +19,7 @@ use Psr\SimpleCache\CacheInterface;
  */
 class RedisCache implements CacheInterface
 {
-    use BasicRedisAwareTrait, DataParserAwareTrait, LiteEventTrait;
+    use BasicRedisAwareTrait, DataParserAwareTrait;
 
     // ARGS: ($name, $mode, $config)
     const CONNECT = 'redis.connect';
@@ -52,10 +50,11 @@ class RedisCache implements CacheInterface
      * redis 中 key 是否存在
      * @param string $key
      * @return bool
+     * @throws InvalidArgumentException
      */
     public function hasKey($key)
     {
-        return $this->call('exists', $key);
+        return $this->execute('exists', $key);
     }
 
     /**************************************************************************
@@ -73,8 +72,8 @@ class RedisCache implements CacheInterface
 
         $key = $this->getCacheKey($key);
 
-        if ($this->call('exists', $key)) {
-            $result = $this->call('get', $key);
+        if ($this->execute('exists', $key)) {
+            $result = $this->execute('get', $key);
 
             return $this->getParser()->decode($result);
         }
@@ -94,13 +93,13 @@ class RedisCache implements CacheInterface
         $key = $this->getCacheKey($key);
         $value = $this->getParser()->encode($value);
 
-        return $this->call('set', $key, $value, $ttl);
+        return $this->execute('set', $key, $value, $ttl);
     }
 
     /**
      * @param string $key
      * @return bool
-     * @throws ConnectionException
+     * @throws InvalidArgumentException
      */
     public function delete($key)
     {
@@ -110,7 +109,7 @@ class RedisCache implements CacheInterface
 
         $key = $this->getCacheKey($key);
 
-        return $this->call('del', $key) > 0;
+        return $this->execute('del', $key) > 0;
     }
 
     /**
@@ -118,7 +117,7 @@ class RedisCache implements CacheInterface
      */
     public function clear()
     {
-        return $this->call('flushDB');
+        return $this->execute('flushDB');
     }
 
     /**
@@ -132,7 +131,7 @@ class RedisCache implements CacheInterface
 
         $key = $this->getCacheKey($key);
 
-        return $this->call('exists', $key);
+        return $this->execute('exists', $key);
     }
 
     /**
@@ -166,7 +165,7 @@ class RedisCache implements CacheInterface
         }, $keys);
 
         /** @var array $results */
-        $results = $this->call('getMultiple', $keyList);
+        $results = $this->execute('getMultiple', $keyList);
 
         foreach ($results as $idx => $value) {
             $key = $keys[$idx];
@@ -199,7 +198,7 @@ class RedisCache implements CacheInterface
     public function setMultiple($values, $ttl = null)
     {
         /** @var \Redis $rds */
-        $rds = $this->call('multi');
+        $rds = $this->execute('multi');
 
         foreach ($values as $key => $value) {
             $key = $this->getCacheKey($key);
@@ -227,7 +226,7 @@ class RedisCache implements CacheInterface
             return $this->getCacheKey($key);
         }, $keys);
 
-        return $this->call('del', $keyList) > 0;
+        return $this->execute('del', $keyList) > 0;
     }
 
     /**************************************************************************
@@ -237,7 +236,7 @@ class RedisCache implements CacheInterface
     /**
      * @return bool
      */
-    public function isRefresh(): bool
+    public function isRefresh()
     {
         return $this->refresh;
     }
