@@ -6,11 +6,11 @@
  * Time: 19:07
  */
 
-namespace Inhere\LiteCache;
+namespace Inhere\LiteCache\Parsers;
 
 /**
  * Class PhpParser
- * @package Inhere\LiteCache
+ * @package Inhere\LiteCache\Parsers
  */
 class PhpParser implements ParserInterface
 {

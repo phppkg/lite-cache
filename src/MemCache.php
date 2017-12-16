@@ -36,14 +36,10 @@ class MemCache implements CacheInterface
     // ARGS: ($method, array $data)
     const AFTER_EXECUTE = 'memcache.afterExecute';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $driverName;
 
-    /**
-     * @var \Memcached|\Memcache
-     */
+    /** @var \Memcached|\Memcache */
     private $driver;
 
     /** @var bool Refresh current request cache. */
@@ -55,12 +51,25 @@ class MemCache implements CacheInterface
     protected $config = [
         'prefix' => 'MEM_',
 
+        // for memcached
+        'persistentId' => '',
+        'options' => [
+
+        ],
+
         'servers' => [
             'name1' => [
                 'host' => '127.0.0.1',
                 'port' => 11211,
                 'weight' => 0,
+
+                // only for memcache
                 'timeout' => 1,
+                'persistent' => true,
+                'retry_interval' => 15,
+                'status' => true,
+                'failure_callback' => null,
+                'timeoutMs' => 0,
             ]
         ]
     ];
@@ -99,21 +108,26 @@ class MemCache implements CacheInterface
 
         $servers = $this->getConfig('servers', []);
 
-        // It is Memcached
-        if ($this->isMemcached()) {
-            $this->driver = new \Memcached();
+        try {
+            // It is Memcached
+            if ($this->isMemcached()) {
+                if ($persistentId = $this->getConfig('persistentId')) {
+                    $this->driver = new \Memcached($persistentId);
+                } else {
+                    $this->driver = new \Memcached();
+                }
+            } else {
+                $this->driver = new \Memcache();
+            }
+
+            foreach ((array)$servers as $server) {
+                $this->addServerByArray($server);
+            }
+
             $this->fire(self::CONNECT, [$this]);
-
-            return $this->driver->addServers($servers);
+        } catch (\Throwable $e) {
+            throw new ConnectionException("Connect memcache server error: {$e->getMessage()}");
         }
-
-        $this->driver = new \Memcache();
-
-        foreach ((array)$servers as $server) {
-            $this->driver->addServer($server);
-        }
-
-        $this->fire(self::CONNECT, [$this]);
 
         return $this;
     }
@@ -173,7 +187,6 @@ class MemCache implements CacheInterface
             'host' => '127.0.0.1',
             'port' => 11211,
             'weight' => 0,
-            'timeout' => 1,
         ], $config);
 
         // for Memcached
@@ -183,6 +196,7 @@ class MemCache implements CacheInterface
 
         // for Memcache
         $cfg = array_merge([
+            'timeout' => 1,
             'persistent' => true,
             'retry_interval' => 15,
             'status' => true,
@@ -197,7 +211,7 @@ class MemCache implements CacheInterface
     }
 
     /**
-     * @param $host
+     * @param string $host
      * @param int $port
      * @param int $weight
      * @param bool $persistent
@@ -251,12 +265,12 @@ class MemCache implements CacheInterface
     /**
      * @param string $key
      * @param mixed $default
-     * @return array|bool|string
+     * @return mixed
      */
     public function get($key, $default = null)
     {
-        if (!$key || !$this->isRefresh()) {
-            return false;
+        if (!$key || $this->isRefresh()) {
+            return $default;
         }
 
         $key = $this->getCacheKey($key);
@@ -288,7 +302,7 @@ class MemCache implements CacheInterface
         $value = $this->getParser()->encode($value);
 
         if ($this->isMemcached()) {
-            $this->driver->set($key, $value, $ttl);
+            return $this->driver->set($key, $value, (int)$ttl);
         }
 
         return $this->driver->set($key, $value, 0, $ttl);

@@ -66,7 +66,7 @@ class RedisCache implements CacheInterface
      */
     public function get($key, $default = null)
     {
-        if (!$key || !$this->isRefresh()) {
+        if (!$key || $this->isRefresh()) {
             return $default;
         }
 

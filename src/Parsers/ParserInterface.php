@@ -6,11 +6,11 @@
  * Time: 19:07
  */
 
-namespace Inhere\LiteCache;
+namespace Inhere\LiteCache\Parsers;
 
 /**
  * Interface ParserInterface
- * @package Inhere\LiteCache
+ * @package Inhere\LiteCache\Parsers
  */
 interface ParserInterface
 {
