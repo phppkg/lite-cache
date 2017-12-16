@@ -58,4 +58,25 @@ class RedisCacheTest extends TestCase
         $ret = $rds->get('test');
         $this->assertSame($ret, $val);
     }
+
+    public function testGetSetArray()
+    {
+        $key = 'testArray';
+        $rds = $this->rds;
+        $rds->clear();
+
+        $ret = $rds->get($key);
+        $this->assertNull($ret);
+
+        $ret = $rds->get($key, false);
+        $this->assertFalse($ret);
+
+        $val = [34, 'value'];
+        $ret = $rds->set($key, $val);
+        $this->assertTrue($ret);
+
+        $ret = $rds->get($key);
+        $this->assertCount(2, $ret);
+        $this->assertSame($ret, $val);
+    }
 }

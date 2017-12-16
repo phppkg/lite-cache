@@ -51,7 +51,6 @@ class MemCacheTest extends TestCase
 
     public function testSimpleGetSet()
     {
-        // $mem = new MemCache(self::CONFIG);
         $mem = $this->mem;
         $mem->clear();
 
@@ -66,6 +65,27 @@ class MemCacheTest extends TestCase
         $this->assertTrue($ret);
 
         $ret = $mem->get('test');
+        $this->assertSame($ret, $val);
+    }
+
+    public function testGetSetArray()
+    {
+        $key = 'testArray';
+        $mem = $this->mem;
+        $mem->clear();
+
+        $ret = $mem->get($key);
+        $this->assertNull($ret);
+
+        $ret = $mem->get($key, false);
+        $this->assertFalse($ret);
+
+        $val = [34, 'value'];
+        $ret = $mem->set($key, $val);
+        $this->assertTrue($ret);
+
+        $ret = $mem->get($key);
+        $this->assertCount(2, $ret);
         $this->assertSame($ret, $val);
     }
 }
