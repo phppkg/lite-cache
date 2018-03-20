@@ -12,7 +12,7 @@ namespace Inhere\LiteCache;
  * Class ConnectionException
  * @package Inhere\LiteCache
  */
-class ConnectionException extends \Exception
+class ConnectionException extends \RuntimeException
 {
 
 }

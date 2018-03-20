@@ -167,7 +167,7 @@ use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
  * @method array  geoRadius($key, $longitude, $latitude, $radius, $unit, array $options = null)
  * @method array  geoRadiusByMember($key, $member, $radius, $unit, array $options = null)
  */
-class ExtendedRedis
+class LiteRedis
 {
     use BasicRedisAwareTrait;
 
@@ -216,10 +216,10 @@ class ExtendedRedis
 
     /**
      * 获取集合的全部数据
-     * @param $key
+     * @param string $key
      * @return array
      */
-    public function getSetList($key)
+    public function getSetList(string $key): array
     {
         return $this->sMembers($key);
     }
@@ -229,7 +229,7 @@ class ExtendedRedis
      * @param $key
      * @return bool
      */
-    public function hasSet($key)
+    public function hasSet(string $key): bool
     {
         return $this->sCard($key) > 0;
     }
@@ -240,7 +240,7 @@ class ExtendedRedis
      * @param $member
      * @return bool
      */
-    public function isInSet($key, $member)
+    public function isInSet(string $key, $member): bool
     {
         return $this->sIsMember($key, $member);
     }
@@ -251,21 +251,21 @@ class ExtendedRedis
 
     /**
      * 有序集合是否存在
-     * @param $key
+     * @param string $key
      * @return bool
      */
-    public function hasZSet($key)
+    public function hasZSet(string $key): bool
     {
         return $this->hasKey($key) && $this->zCard($key) > 0;
     }
 
     /**
      * 有序集合是否存在元素
-     * @param $key
+     * @param string $key
      * @param $member
-     * @return bool|float
+     * @return bool
      */
-    public function isInZSet($key, $member)
+    public function isInZSet(string $key, $member): bool
     {
         return $this->zScore($key, $member) !== false;
     }
@@ -287,7 +287,7 @@ class ExtendedRedis
      * @param null|int $score
      * @return int
      */
-    public function addToZSet($key, $member, $score = null)
+    public function addToZSet(string $key, $member, $score = null): int
     {
         if (!$key) {
             return 0;
@@ -301,10 +301,10 @@ class ExtendedRedis
             /** @var array $result */
             $result = (array)$rds->exec();
 
-            return array_sum($result);
+            return \array_sum($result);
         }
 
-        $score = is_numeric($score) ? (int)$score : time();
+        $score = \is_numeric($score) ? (int)$score : time();
 
         return $this->zAdd($key, $score, $member);
     }
@@ -319,9 +319,9 @@ class ExtendedRedis
      *  ]
      * @param $key
      * @param callable $scoreMemberHandler
-     * @return int|number
+     * @return int
      */
-    public function addDataListToZSet($key, $data, callable $scoreMemberHandler)
+    public function addDataListToZSet(string $key, $data, callable $scoreMemberHandler): int
     {
         if (!$data || !$key) {
             return 0;
@@ -336,7 +336,7 @@ class ExtendedRedis
 
         $result = (array)$rds->exec();
 
-        return array_sum($result);
+        return \array_sum($result);
     }
 
     /**
@@ -348,7 +348,7 @@ class ExtendedRedis
      * @param bool $withScore
      * @return array
      */
-    public function getZSetList($key, $start = 0, $stop = -1, $withScore = null)
+    public function getZSetList($key, $start = 0, $stop = -1, $withScore = null): array
     {
         return $this->zRange($key, $start, $stop, $withScore);
     }
@@ -362,7 +362,7 @@ class ExtendedRedis
      * @param bool $withScore
      * @return array
      */
-    public function getRevZSetList($key, $start = 0, $stop = -1, $withScore = null)
+    public function getRevZSetList($key, $start = 0, $stop = -1, $withScore = null): array
     {
         return $this->zRevRange($key, $start, $stop, $withScore);
     }
@@ -375,7 +375,7 @@ class ExtendedRedis
      * @param $key
      * @return bool
      */
-    public function hasList($key)
+    public function hasList(string $key): bool
     {
         return $this->hasKey($key) && $this->lLen($key);
     }
@@ -385,7 +385,7 @@ class ExtendedRedis
      * @param $element
      * @return int
      */
-    public function addToList($key, $element)
+    public function addToList(string $key, $element): int
     {
         return $this->setList($key, $element);
     }
@@ -398,7 +398,7 @@ class ExtendedRedis
      * @param int $stop 结束位置
      * @return array
      */
-    public function getList($key, $start = 0, $stop = -1)
+    public function getList(string $key, int $start = 0, int $stop = -1): array
     {
         // list:magazine:100:images 12 13 14
         return $this->lRange($key, $start, $stop);
@@ -410,7 +410,7 @@ class ExtendedRedis
      * @param array $elements
      * @return int
      */
-    public function setList($key, $elements)
+    public function setList(string $key, $elements): int
     {
         // list:magazine:100:images 12 13 14
         $int = 0;
@@ -430,7 +430,7 @@ class ExtendedRedis
      * @param string $key
      * @return bool
      */
-    public function hasHTable($key)
+    public function hasHTable(string $key): bool
     {
         return $this->hasKey($key) && $this->hLen($key) > 0;
     }
@@ -440,7 +440,7 @@ class ExtendedRedis
      * @param $key
      * @return bool
      */
-    public function isEmptyHTable($key)
+    public function isEmptyHTable(string $key): bool
     {
         return 0 === $this->hLen($key);
     }
@@ -450,7 +450,7 @@ class ExtendedRedis
      * @param $field
      * @return bool
      */
-    public function isInHTable($key, $field)
+    public function isInHTable($key, $field): bool
     {
         return $this->hExists($key, $field);
     }
@@ -461,9 +461,9 @@ class ExtendedRedis
      * @param int $step
      * @return int
      */
-    public function htIncrField($key, $field, $step = 1)
+    public function htIncrField(string $key, $field, int $step = 1): int
     {
-        return $this->hIncrBy($key, $field, (int)$step);
+        return $this->hIncrBy($key, $field, $step);
     }
 
     /**
@@ -473,7 +473,7 @@ class ExtendedRedis
      * @param bool $zeroLimit 最小为零限制 限制最小可以自减到 0
      * @return int
      */
-    public function htDecrField($key, $field, $step = 1, $zeroLimit = true)
+    public function htDecrField(string $key, $field, int $step = 1, $zeroLimit = true): int
     {
         // fix: not allow lt 0
         if ($zeroLimit && ((int)$this->hGet($key, $field) <= 0)) {
@@ -490,30 +490,30 @@ class ExtendedRedis
      * @param int $default
      * @return mixed
      */
-    public function htInitByDefault($key, array $fields, $default = 0)
+    public function htInitByDefault(string $key, array $fields, $default = 0)
     {
-        $data = array_fill_keys($fields, $default);
+        $data = \array_fill_keys($fields, $default);
 
         return $this->hMSet($key, $data);
     }
 
     /**
      * 获取hash table指定的一些字段的信息
-     * @param $key
+     * @param string $key
      * @param array $fields
      * @param bool $valToInt 将所有的值转成int,在将hash table做为计数器时有用
      * @return array
      */
-    public function htGetMulti($key, array $fields, $valToInt = false)
+    public function htGetMulti(string $key, array $fields, $valToInt = false): array
     {
         $data = $this->hMGet($key, $fields);
 
-//        if ($data && class_exists('\\Predis\\Client') && is_subclass_of($this->_redis, '\\Predis\\ClientInterface')) {
-//            $data = array_combine($fields, $data);
-//        }
+        // if ($data && class_exists('\\Predis\\Client') && is_subclass_of($this->_redis, '\\Predis\\ClientInterface')) {
+        //     $data = array_combine($fields, $data);
+        // }
 
         if ($valToInt) {
-            array_walk($data, function (&$val) {
+            \array_walk($data, function (&$val) {
                 $val = (int)$val;
             });
         }
@@ -526,12 +526,12 @@ class ExtendedRedis
      * @param bool $valToInt
      * @return array
      */
-    public function htGetAll($key, $valToInt = false)
+    public function htGetAll(string $key, $valToInt = false): array
     {
         $data = $this->hGetAll($key);
 
         if ($valToInt) {
-            array_walk($data, function (&$val) {
+            \array_walk($data, function (&$val) {
                 $val = (int)$val;
             });
         }
@@ -548,14 +548,14 @@ class ExtendedRedis
      * @param $key
      * @param string|array $value
      * @param int $seconds
-     * @return mixed
+     * @return int
      */
-    public function addCache($key, $value, $seconds = 3600)
+    public function addCache(string $key, $value, $seconds = 3600): int
     {
         $key = $this->getCacheKey($key);
 
         // return $this->set($key, serialize($value), 'EX', $seconds, 'NX');
-        return $this->exists($key) ? true : $this->setCache($key, $value, $seconds);
+        return $this->exists($key) ? 0 : $this->setCache($key, $value, $seconds);
     }
 
     /**
@@ -563,42 +563,42 @@ class ExtendedRedis
      * @param $key
      * @param $seconds
      * @param string|array $value 要存储的数据 可以是字符串或者数组
-     * @return mixed
+     * @return int
      */
-    public function setCache($key, $value, $seconds = 3600)
+    public function setCache(string $key, $value, $seconds = 3600): int
     {
         $key = $this->getCacheKey($key);
 
         // return $this->set($key, serialize($value), 'EX', $seconds);
-        return $this->setEx($key, $seconds, serialize($value));
+        return $this->setEx($key, $seconds, \serialize($value));
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param null $default
      * @return string
      */
-    public function getCache($key, $default = null)
+    public function getCache(string $key, $default = null): string
     {
         $key = $this->getCacheKey($key);
 
-        return ($data = $this->get($key)) ? unserialize($data, []) : $default;
+        return ($data = $this->get($key)) ? \unserialize($data, []) : $default;
     }
 
     /**
      * @param $key
      * @return int
      */
-    public function hasCache($key)
+    public function hasCache(string $key): int
     {
         return $this->exists($this->getCacheKey($key));
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return mixed
      */
-    public function delCache($key)
+    public function delCache(string $key)
     {
         $key = $this->getCacheKey($key);
         $data = $this->get($key);
@@ -611,7 +611,7 @@ class ExtendedRedis
      * @param $key
      * @return string
      */
-    public function getCacheKey($key)
+    public function getCacheKey(string $key): string
     {
         return $this->config['prefix'] . $key;
     }
@@ -626,7 +626,7 @@ class ExtendedRedis
      * SERVER | CLIENTS | MEMORY | PERSISTENCE | STATS | REPLICATION | CPU | CLASTER | KEYSPACE | COMANDSTATS
      * @return array
      */
-    public function getStats($section = null)
+    public function getStats(string $section = null): array
     {
         // used_memory
         return $this->info($section);

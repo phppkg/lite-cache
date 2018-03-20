@@ -6,11 +6,11 @@
  * Time: 19:07
  */
 
-namespace Inhere\LiteCache\Parsers;
+namespace Inhere\LiteCache\Parser;
 
 /**
  * Interface ParserInterface
- * @package Inhere\LiteCache\Parsers
+ * @package Inhere\LiteCache\Parser
  */
 interface ParserInterface
 {
@@ -18,11 +18,11 @@ interface ParserInterface
      * @param mixed $data
      * @return string
      */
-    public function encode($data);
+    public function encode($data): string;
 
     /**
      * @param string $data
      * @return mixed
      */
-    public function decode($data);
+    public function decode(string $data);
 }

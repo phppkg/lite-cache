@@ -6,16 +6,17 @@
  * Time: 21:23
  */
 
-namespace Inhere\LiteCache\Parsers;
+namespace Inhere\LiteCache\Parser;
 
 /**
  * Class MsgPackParser
- * @package Inhere\LiteCache\Parsers
+ * @package Inhere\LiteCache\Parser
  */
 class MsgPackParser implements ParserInterface
 {
     /**
      * class constructor.
+     * @throws \RuntimeException
      */
     public function __construct()
     {
@@ -28,7 +29,7 @@ class MsgPackParser implements ParserInterface
      * @param mixed $data
      * @return string
      */
-    public function encode($data)
+    public function encode($data): string 
     {
         return \msgpack_pack($data);
     }
@@ -37,7 +38,7 @@ class MsgPackParser implements ParserInterface
      * @param string $data
      * @return mixed
      */
-    public function decode($data)
+    public function decode(string $data)
     {
         return \msgpack_unpack($data);
     }

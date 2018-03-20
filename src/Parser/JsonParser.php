@@ -6,11 +6,11 @@
  * Time: 19:07
  */
 
-namespace Inhere\LiteCache\Parsers;
+namespace Inhere\LiteCache\Parser;
 
 /**
  * Class JsonParser
- * @package Inhere\LiteCache\Parsers
+ * @package Inhere\LiteCache\Parser
  */
 class JsonParser implements ParserInterface
 {
@@ -34,18 +34,18 @@ class JsonParser implements ParserInterface
      * @param string $data
      * @return mixed
      */
-    public function decode($data)
+    public function decode(string $data)
     {
-        return json_decode($data, $this->assoc);
+        return \json_decode($data, $this->assoc);
     }
 
     /**
      * @param mixed $data
      * @return string
      */
-    public function encode($data)
+    public function encode($data): string
     {
-        return serialize($data);
+        return \json_encode($data);
     }
 
     /**

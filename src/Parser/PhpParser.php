@@ -6,11 +6,11 @@
  * Time: 19:07
  */
 
-namespace Inhere\LiteCache\Parsers;
+namespace Inhere\LiteCache\Parser;
 
 /**
  * Class PhpParser
- * @package Inhere\LiteCache\Parsers
+ * @package Inhere\LiteCache\Parser
  */
 class PhpParser implements ParserInterface
 {
@@ -18,17 +18,17 @@ class PhpParser implements ParserInterface
      * @param mixed $data
      * @return string
      */
-    public function encode($data)
+    public function encode($data): string
     {
-        return serialize($data);
+        return \serialize($data);
     }
 
     /**
      * @param string $data
      * @return mixed
      */
-    public function decode($data)
+    public function decode(string $data)
     {
-        return unserialize($data, []);
+        return \unserialize($data, []);
     }
 }

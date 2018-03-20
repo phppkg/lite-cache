@@ -8,8 +8,8 @@
 
 namespace Inhere\LiteCache\Traits;
 
-use Inhere\LiteCache\Parsers\ParserInterface;
-use Inhere\LiteCache\Parsers\PhpParser;
+use Inhere\LiteCache\Parser\ParserInterface;
+use Inhere\LiteCache\Parser\PhpParser;
 
 /**
  * Class DataParserAwareTrait

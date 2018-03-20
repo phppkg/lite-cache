@@ -23,7 +23,7 @@ trait ConfigAndEventAwareTrait
      * @param callable $cb event callback
      * @param bool $replace replace exists's event cb
      */
-    public function on($name, callable $cb, $replace = false)
+    public function on(string $name, callable $cb, $replace = false)
     {
         if ($replace || !isset($this->_events[$name])) {
             $this->_events[$name] = $cb;
@@ -35,7 +35,7 @@ trait ConfigAndEventAwareTrait
      * @param array $args
      * @return mixed
      */
-    protected function fire($name, array $args = [])
+    protected function fire(string $name, array $args = [])
     {
         if (!isset($this->_events[$name]) || !($cb = $this->_events[$name])) {
             return null;
@@ -50,7 +50,7 @@ trait ConfigAndEventAwareTrait
      * @param mixed $default
      * @return array|mixed
      */
-    public function getConfig($key = null, $default = null)
+    public function getConfig(string $key = null, $default = null)
     {
         if ($key) {
             return $this->config[$key] ?? $default;
@@ -73,7 +73,7 @@ trait ConfigAndEventAwareTrait
     }
 
     /**
-     * @param callable $cb
+     * @param callable|mixed $cb
      * @param array ...$args
      * @return mixed
      */

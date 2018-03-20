@@ -9,7 +9,6 @@
 namespace Inhere\LiteCache\Traits;
 
 use Inhere\LiteCache\ConnectionException;
-use Inhere\LiteCache\InvalidArgumentException;
 
 /**
  * Trait BasicRedisAwareTrait
@@ -74,16 +73,16 @@ trait BasicRedisAwareTrait
     /**
      * @return bool
      */
-    public static function isSupported()
+    public static function isSupported(): bool
     {
-        return class_exists(\Redis::class, false);
+        return \class_exists(\Redis::class, false);
     }
 
     /**
      * @return $this
      * @throws ConnectionException
      */
-    public function connect()
+    public function connect(): self
     {
         if ($this->redis) {
             return $this;
@@ -170,11 +169,12 @@ trait BasicRedisAwareTrait
      * @param string $method
      * @param array $args
      * @return mixed
+     * @throws \InvalidArgumentException
      */
-    public function execute($method, ...$args)
+    public function execute(string $method, ...$args)
     {
         $this->connect();
-        $upperMethod = strtoupper($method);
+        $upperMethod = \strtoupper($method);
 
         // exists
         if (\method_exists($this->redis, $upperMethod)) {
@@ -189,14 +189,14 @@ trait BasicRedisAwareTrait
             return $ret;
         }
 
-        throw new InvalidArgumentException("Call the redis command method [$method] don't exists!");
+        throw new \InvalidArgumentException("Call the redis command method [$method] don't exists!");
     }
 
     /**
      * get Connection
      * @return \Redis
      */
-    public function getRedis()
+    public function getRedis(): \Redis
     {
         return $this->redis;
     }
