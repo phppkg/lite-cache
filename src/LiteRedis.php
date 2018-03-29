@@ -582,7 +582,7 @@ class LiteRedis
     {
         $key = $this->getCacheKey($key);
 
-        return ($data = $this->get($key)) ? \unserialize($data, []) : $default;
+        return ($data = $this->get($key)) ? \unserialize($data, ['allowed_classes' => false]) : $default;
     }
 
     /**

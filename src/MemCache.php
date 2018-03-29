@@ -99,8 +99,9 @@ class MemCache implements CacheInterface
 
     /**
      * @return $this
+     * @throws \Inhere\LiteCache\ConnectionException
      */
-    public function connect()
+    public function connect(): self
     {
         if ($this->driver) {
             return $this;
@@ -134,6 +135,7 @@ class MemCache implements CacheInterface
 
     /**
      * reconnect
+     * @throws \Inhere\LiteCache\ConnectionException
      */
     public function reconnect()
     {
@@ -165,6 +167,8 @@ class MemCache implements CacheInterface
      * @param string $method
      * @param array $args
      * @return mixed
+     * @throws \Inhere\LiteCache\ConnectionException
+     * @throws InvalidArgumentException
      */
     public function execute($method, ...$args)
     {
@@ -181,7 +185,7 @@ class MemCache implements CacheInterface
      * @param array $config
      * @return bool
      */
-    public function addServerByArray(array $config)
+    public function addServerByArray(array $config): bool
     {
         $cfg = array_merge([
             'host' => '127.0.0.1',
@@ -225,8 +229,7 @@ class MemCache implements CacheInterface
     public function addServer(
         $host, $port = 11211, $weight = 0, $persistent = true, $timeout = 1,
         $retry_interval = 15, $status = true, callable $failure_callback = null, $timeoutMs = 0
-    )
-    {
+    ): bool {
         // for Memcached
         if ($this->isMemcached()) {
             return $this->driver->addServer($host, $port, $weight);
@@ -243,7 +246,7 @@ class MemCache implements CacheInterface
      * @param string $key
      * @return string
      */
-    public function getCacheKey($key)
+    public function getCacheKey($key): string
     {
         return $this->getConfig('prefix') . $key;
     }
@@ -253,7 +256,7 @@ class MemCache implements CacheInterface
      * @param string $key
      * @return bool
      */
-    public function hasKey($key)
+    public function hasKey($key): bool
     {
         return false !== $this->driver->get($key);
     }
@@ -292,7 +295,7 @@ class MemCache implements CacheInterface
      * param int $flag 当 driver is 'Memcache' 表示是否用MEMCACHE_COMPRESSED来压缩存储的值，true表示压缩，false表示不压缩。
      * @return bool
      */
-    public function set($key, $value, $ttl = null)
+    public function set($key, $value, $ttl = null): bool
     {
         if (!$key) {
             return false;
@@ -312,7 +315,7 @@ class MemCache implements CacheInterface
      * @param string $key
      * @return bool
      */
-    public function has($key)
+    public function has($key): bool
     {
         if (!$key) {
             return false;
@@ -327,7 +330,7 @@ class MemCache implements CacheInterface
      * @param string $key
      * @return true OR false
      */
-    public function delete($key)
+    public function delete($key): bool
     {
         if (!$key) {
             return false;
@@ -342,7 +345,7 @@ class MemCache implements CacheInterface
      * 清空所有缓存
      * @return bool
      */
-    public function clear()
+    public function clear(): bool
     {
         return $this->driver->flush();
     }
@@ -388,7 +391,7 @@ class MemCache implements CacheInterface
      * {@inheritdoc}
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setMulti($values, $ttl = null)
+    public function setMulti($values, $ttl = null): bool
     {
         return $this->setMultiple($values, $ttl);
     }
@@ -404,7 +407,7 @@ class MemCache implements CacheInterface
      *   MUST be thrown if $values is neither an array nor a Traversable,
      *   or if any of the $values are not a legal value.
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple($values, $ttl = null): bool
     {
         $ok = true;
         $encoded = [];
@@ -437,9 +440,9 @@ class MemCache implements CacheInterface
      *   MUST be thrown if $keys is neither an array nor a Traversable,
      *   or if any of the $keys are not a legal value.
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple($keys): bool
     {
-        $keyList = array_map(function ($key) {
+        $keyList = \array_map(function ($key) {
             return $this->getCacheKey($key);
         }, $keys);
 
@@ -462,7 +465,7 @@ class MemCache implements CacheInterface
      * @param  int $value
      * @return bool
      */
-    public function increment($key, $value)
+    public function increment($key, $value): bool
     {
         return $this->driver->increment($key, (int)$value);
     }
@@ -474,7 +477,7 @@ class MemCache implements CacheInterface
      * @param  int $value
      * @return int
      */
-    public function decrement($key, $value)
+    public function decrement($key, $value): int
     {
         return $this->driver->decrement($key, (int)$value);
     }
@@ -492,7 +495,7 @@ class MemCache implements CacheInterface
      * @param int $flag 当 driver is 'Memcache' 表示是否用MEMCACHE_COMPRESSED来压缩存储的值，true表示压缩，false表示不压缩。
      * @return bool
      */
-    public function add($key, $value, $ttl = 0, $flag = 0)
+    public function add($key, $value, $ttl = 0, $flag = 0): bool
     {
         if (!$key) {
             return false;
@@ -513,7 +516,7 @@ class MemCache implements CacheInterface
      * @param int $flag use @see \Memcache::MEMCACHE_COMPRESSED
      * @return bool
      */
-    public function replace($key, $value, $ttl = 0, $flag = 0)
+    public function replace($key, $value, $ttl = 0, $flag = 0): bool
     {
         if ($this->isMemcached()) {
             return $this->driver->replace($key, $value, $ttl);
@@ -529,7 +532,7 @@ class MemCache implements CacheInterface
      * @param int $limit
      * @return array
      */
-    public function getStats($type = 'items', $slabId, $limit = 100)
+    public function getStats($type = 'items', $slabId, $limit = 100): array
     {
         if ($this->isMemcached()) {
             return $this->driver->getStats();

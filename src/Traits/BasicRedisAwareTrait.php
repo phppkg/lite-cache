@@ -9,6 +9,7 @@
 namespace Inhere\LiteCache\Traits;
 
 use Inhere\LiteCache\ConnectionException;
+use Inhere\LiteCache\InvalidArgumentException;
 
 /**
  * Trait BasicRedisAwareTrait
@@ -169,7 +170,7 @@ trait BasicRedisAwareTrait
      * @param string $method
      * @param array $args
      * @return mixed
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function execute(string $method, ...$args)
     {
@@ -189,7 +190,7 @@ trait BasicRedisAwareTrait
             return $ret;
         }
 
-        throw new \InvalidArgumentException("Call the redis command method [$method] don't exists!");
+        throw new InvalidArgumentException("Call the redis command method [$method] don't exists!");
     }
 
     /**

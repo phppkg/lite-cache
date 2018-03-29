@@ -41,7 +41,7 @@ class RedisCache implements CacheInterface
      * @param string $key
      * @return string
      */
-    public function getCacheKey($key)
+    public function getCacheKey($key): string
     {
         return $this->config['prefix'] . $key;
     }
@@ -52,7 +52,7 @@ class RedisCache implements CacheInterface
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function hasKey($key)
+    public function hasKey($key): bool
     {
         return $this->execute('exists', $key);
     }
@@ -63,6 +63,7 @@ class RedisCache implements CacheInterface
 
     /**
      * {@inheritdoc}
+     * @throws InvalidArgumentException
      */
     public function get($key, $default = null)
     {
@@ -83,6 +84,8 @@ class RedisCache implements CacheInterface
 
     /**
      * {@inheritdoc}
+     * @throws \Inhere\LiteCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function set($key, $value, $ttl = null)
     {
@@ -101,7 +104,7 @@ class RedisCache implements CacheInterface
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function delete($key)
+    public function delete($key): bool
     {
         if (!$key) {
             return false;
@@ -114,6 +117,7 @@ class RedisCache implements CacheInterface
 
     /**
      * {@inheritdoc}
+     * @throws \Inhere\LiteCache\InvalidArgumentException
      */
     public function clear()
     {
@@ -137,6 +141,7 @@ class RedisCache implements CacheInterface
     /**
      * alias of the `getMultiple`
      * {@inheritdoc}
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getMulti($keys, $default = null)
     {
@@ -178,8 +183,9 @@ class RedisCache implements CacheInterface
     /**
      * alias of the `setMultiple`
      * {@inheritdoc}
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setMulti($values, $ttl = null)
+    public function setMulti($values, $ttl = null): bool
     {
         return $this->setMultiple($values, $ttl);
     }
@@ -195,7 +201,7 @@ class RedisCache implements CacheInterface
      *   MUST be thrown if $values is neither an array nor a Traversable,
      *   or if any of the $values are not a legal value.
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple($values, $ttl = null): bool
     {
         /** @var \Redis $rds */
         $rds = $this->execute('multi');
@@ -220,9 +226,9 @@ class RedisCache implements CacheInterface
      *   MUST be thrown if $keys is neither an array nor a Traversable,
      *   or if any of the $keys are not a legal value.
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple($keys): bool
     {
-        $keyList = array_map(function ($key) {
+        $keyList = \array_map(function ($key) {
             return $this->getCacheKey($key);
         }, $keys);
 
@@ -236,7 +242,7 @@ class RedisCache implements CacheInterface
     /**
      * @return bool
      */
-    public function isRefresh()
+    public function isRefresh(): bool
     {
         return $this->refresh;
     }
