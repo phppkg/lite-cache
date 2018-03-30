@@ -10,7 +10,7 @@
 namespace Inhere\LiteCache;
 
 use Inhere\LiteCache\Traits\ConfigAndEventAwareTrait;
-use Inhere\LiteCache\Traits\DataParserAwareTrait;
+use MyLib\DataParser\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**

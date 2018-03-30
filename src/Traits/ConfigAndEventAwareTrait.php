@@ -81,13 +81,13 @@ trait ConfigAndEventAwareTrait
     {
         if (\is_string($cb)) {
             // function
-            if (strpos($cb, '::') === false) {
+            if (\strpos($cb, '::') === false) {
                 return $cb(...$args);
             }
 
             // ClassName::method
-            $cb = explode('::', $cb, 2);
-        } elseif (\is_object($cb) && method_exists($cb, '__invoke')) {
+            $cb = \explode('::', $cb, 2);
+        } elseif (\is_object($cb) && \method_exists($cb, '__invoke')) {
             return $cb(...$args);
         }
 

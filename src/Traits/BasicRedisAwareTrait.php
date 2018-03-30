@@ -118,30 +118,30 @@ trait BasicRedisAwareTrait
         return $this;
     }
 
-    protected function onConnect()
-    {
-        // $this->fire(self::CONNECT, [$this]);
-    }
+    abstract protected function onConnect(): void;
+    // {
+    //     $this->fire(self::CONNECT, [$this]);
+    // }
 
-    protected function onDisconnect()
-    {
-        // $this->fire(self::DISCONNECT, [$this]);
-    }
+    abstract protected function onDisconnect(): void;
+    //{
+    //     $this->fire(self::DISCONNECT, [$this]);
+    //}
 
-    protected function onBeforeExecute($method, $args)
-    {
-        // $this->fire(self::BEFORE_EXECUTE, [$method, $args]);
-    }
+    abstract protected function onBeforeExecute($method, $args): void;
+    // {
+    //     $this->fire(self::BEFORE_EXECUTE, [$method, $args]);
+    // }
 
-    protected function onAfterExecute($method, $args, $ret)
-    {
-        // $this->fire(self::AFTER_EXECUTE, [$method, $args, $ret]);
-    }
+    abstract protected function onAfterExecute($method, $args, $ret): void;
+    // {
+    //     $this->fire(self::AFTER_EXECUTE, [$method, $args, $ret]);
+    // }
 
     /**
      * reconnect
      */
-    public function reconnect()
+    public function reconnect(): void
     {
         $this->redis = null;
         $this->connect();

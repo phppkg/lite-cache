@@ -180,22 +180,22 @@ class LiteRedis
     // ARGS: ($method, array $data)
     const AFTER_EXECUTE = 'redis.afterExecute';
 
-    protected function onConnect()
+    protected function onConnect(): void
     {
         $this->fire(self::CONNECT, [$this]);
     }
 
-    protected function onDisconnect()
+    protected function onDisconnect(): void
     {
         $this->fire(self::DISCONNECT, [$this]);
     }
 
-    protected function onBeforeExecute($method, $args)
+    protected function onBeforeExecute($method, $args): void
     {
         $this->fire(self::BEFORE_EXECUTE, [$method, $args]);
     }
 
-    protected function onAfterExecute($method, $args, $ret)
+    protected function onAfterExecute($method, $args, $ret): void
     {
         $this->fire(self::AFTER_EXECUTE, [$method, $args, $ret]);
     }
@@ -205,7 +205,7 @@ class LiteRedis
      * @param string $key
      * @return bool
      */
-    public function hasKey($key)
+    public function hasKey($key): bool
     {
         return (bool)$this->exists($key);
     }

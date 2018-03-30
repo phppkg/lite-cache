@@ -9,7 +9,7 @@
 namespace Inhere\LiteCache;
 
 use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
-use Inhere\LiteCache\Traits\DataParserAwareTrait;
+use MyLib\DataParser\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -255,22 +255,22 @@ class RedisCache implements CacheInterface
         $this->refresh = (bool)$refresh;
     }
 
-    protected function onConnect()
+    protected function onConnect(): void
     {
         $this->fire(self::CONNECT, [$this]);
     }
 
-    protected function onDisconnect()
+    protected function onDisconnect(): void
     {
         $this->fire(self::DISCONNECT, [$this]);
     }
 
-    protected function onBeforeExecute($method, $args)
+    protected function onBeforeExecute($method, $args): void
     {
         $this->fire(self::BEFORE_EXECUTE, [$method, $args]);
     }
 
-    protected function onAfterExecute($method, $args, $ret)
+    protected function onAfterExecute($method, $args, $ret): void
     {
         $this->fire(self::AFTER_EXECUTE, [$method, $args, $ret]);
     }
