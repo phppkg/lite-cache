@@ -9,7 +9,7 @@
 namespace Inhere\LiteCache;
 
 use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
-use MyLib\DataParser\DataParserAwareTrait;
+use Toolkit\DataParser\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
