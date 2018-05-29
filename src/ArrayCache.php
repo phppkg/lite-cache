@@ -8,13 +8,11 @@
 
 namespace Inhere\LiteCache;
 
-use Psr\SimpleCache\CacheInterface;
-
 /**
  * Class ArrayCache
  * @package Inhere\LiteCache
  */
-class ArrayCache implements CacheInterface
+class ArrayCache extends AbstractCache
 {
     /**
      * @var array
@@ -33,21 +31,6 @@ class ArrayCache implements CacheInterface
         }
 
         return $default;
-    }
-
-    /**
-     * @param iterable $keys
-     * @param null $default
-     * @return array|iterable
-     */
-    public function getMultiple($keys, $default = null)
-    {
-        $results = [];
-        foreach ($keys as $key) {
-            $results[$key] = $this->get($key, $default);
-        }
-
-        return $results;
     }
 
     /**
@@ -73,21 +56,6 @@ class ArrayCache implements CacheInterface
     }
 
     /**
-     * @param iterable $values
-     * @param null $ttl
-     * @return bool
-     */
-    public function setMultiple($values, $ttl = null): bool
-    {
-        foreach ($values as $key => $value) {
-            $this->set($key, $value);
-        }
-
-        return true;
-    }
-
-
-    /**
      * @param string $key
      * @return bool
      */
@@ -103,18 +71,8 @@ class ArrayCache implements CacheInterface
     }
 
     /**
-     * @param iterable $keys
-     * @return bool
+     * @return array
      */
-    public function deleteMultiple($keys): bool
-    {
-        foreach ($keys as $key) {
-            $this->delete($key);
-        }
-
-        return true;
-    }
-
     public function all(): array
     {
         return $this->cache;
@@ -128,5 +86,12 @@ class ArrayCache implements CacheInterface
         $this->cache = [];
     }
 
+    /**
+     * @return bool
+     */
+    public static function isSupported(): bool
+    {
+        return true;
+    }
 }
 

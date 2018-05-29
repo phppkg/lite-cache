@@ -709,6 +709,9 @@ class MemCache implements CacheInterface
         return $listKeys;
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     public function checkEnvironment()
     {
         if (\class_exists('Memcached', false)) {
@@ -727,7 +730,7 @@ class MemCache implements CacheInterface
     /**
      * @return bool
      */
-    public function isMemcached()
+    public function isMemcached(): bool
     {
         return $this->driverName === 'Memcached';
     }
@@ -767,7 +770,7 @@ class MemCache implements CacheInterface
     /**
      * @return bool
      */
-    public function isRefresh()
+    public function isRefresh(): bool
     {
         return $this->refresh;
     }
