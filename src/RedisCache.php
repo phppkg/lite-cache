@@ -89,7 +89,7 @@ class RedisCache implements CacheInterface
      */
     public function set($key, $value, $ttl = null)
     {
-        if (!$key) {
+        if (!$key || $this->isRefresh()) {
             return false;
         }
 

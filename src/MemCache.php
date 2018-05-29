@@ -174,7 +174,7 @@ class MemCache implements CacheInterface
     {
         $this->connect();
 
-        if (method_exists($this->driver, $method)) {
+        if (\method_exists($this->driver, $method)) {
             return $this->driver->$method(...$args);
         }
 
@@ -187,7 +187,7 @@ class MemCache implements CacheInterface
      */
     public function addServerByArray(array $config): bool
     {
-        $cfg = array_merge([
+        $cfg = \array_merge([
             'host' => '127.0.0.1',
             'port' => 11211,
             'weight' => 0,
@@ -199,7 +199,7 @@ class MemCache implements CacheInterface
         }
 
         // for Memcache
-        $cfg = array_merge([
+        $cfg = \array_merge([
             'timeout' => 1,
             'persistent' => true,
             'retry_interval' => 15,
@@ -297,7 +297,7 @@ class MemCache implements CacheInterface
      */
     public function set($key, $value, $ttl = null): bool
     {
-        if (!$key) {
+        if (!$key || $this->isRefresh()) {
             return false;
         }
 
@@ -375,7 +375,7 @@ class MemCache implements CacheInterface
             return [];
         }
 
-        $keyList = array_map(function ($key) {
+        $keyList = \array_map(function ($key) {
             return $this->getCacheKey($key);
         }, $keys);
 
