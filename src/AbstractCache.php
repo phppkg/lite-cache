@@ -44,7 +44,7 @@ abstract class AbstractCache implements CacheInterface
      */
     public function __construct(array $config = [])
     {
-        if (!self::isSupported()) {
+        if (!static::isSupported()) {
             throw new \RuntimeException(
                 \sprintf("The driver '%s'is not support for current env.", self::getDriverName())
             );

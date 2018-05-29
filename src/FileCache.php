@@ -72,7 +72,7 @@ class FileCache extends AbstractCache
             $data = $this->cache[$key];
 
             // in cache file
-        } elseif (\file_exists($file = $this->getFile($key))) {
+        } elseif (\file_exists($file = $this->getCacheFile($key))) {
             $str = \file_get_contents($file);
             $data = $this->getParser()->decode($str);
 
@@ -116,7 +116,14 @@ class FileCache extends AbstractCache
             'val' => $value,
         ];
 
-        return false !== \file_put_contents($this->getFile($key), $data);
+        // encode data
+        $string = $this->getParser()->encode($data);
+        $cacheFile = $this->getCacheFile($key);
+
+        // create dir.
+        $this->createDir(\dirname($cacheFile));
+
+        return false !== \file_put_contents($cacheFile, $string);
     }
 
     /**
@@ -132,7 +139,7 @@ class FileCache extends AbstractCache
             unset($this->cache[$key]);
         }
 
-        $file = $this->getFile($key);
+        $file = $this->getCacheFile($key);
 
         if (\file_exists($file)) {
             return \unlink($file);
@@ -148,7 +155,7 @@ class FileCache extends AbstractCache
     public function clear(): bool
     {
         foreach ($this->cache as $key => $data) {
-            $file = $this->getFile($key);
+            $file = $this->getCacheFile($key);
 
             if (\file_exists($file)) {
                 \unlink($file);
@@ -178,14 +185,14 @@ class FileCache extends AbstractCache
             return true;
         }
 
-        return \file_exists($this->getFile($key));
+        return \file_exists($this->getCacheFile($key));
     }
 
     /**
      * @param string $key
      * @return string
      */
-    protected function getFile(string $key): string
+    protected function getCacheFile(string $key): string
     {
         $name = \md5($key . $this->config['securityKey']);
 
