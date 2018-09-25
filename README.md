@@ -1,6 +1,6 @@
 # simple cache client
 
-[![Packagist](https://img.shields.io/packagist/v/symfony/symfony.svg)](https://packagist.org/packages/inhere/lite-cache)
+[![Packagist](https://img.shields.io/packagist/v/inhere/lite-cache.svg)](https://packagist.org/packages/inhere/lite-cache)
 
 simple cache client for memcached, redis.
 
