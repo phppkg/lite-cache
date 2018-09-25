@@ -1,5 +1,7 @@
 # simple cache client
 
+[![Packagist](https://img.shields.io/packagist/v/symfony/symfony.svg)](https://packagist.org/packages/inhere/lite-cache)
+
 simple cache client for memcached, redis.
 
 - cache implement the simple cache [PSR 16](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-16-simple-cache.md)
