@@ -6,11 +6,11 @@
  * Time: 16:56
  */
 
-namespace Inhere\LiteCache;
+namespace PhpComp\LiteCache;
 
 /**
  * Class ArrayCache
- * @package Inhere\LiteCache
+ * @package PhpComp\LiteCache
  */
 class ArrayCache extends AbstractCache
 {

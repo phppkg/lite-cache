@@ -6,15 +6,15 @@
  * Time: 23:15
  */
 
-namespace Inhere\LiteCache;
+namespace PhpComp\LiteCache;
 
-use Inhere\LiteCache\Traits\ConfigAndEventAwareTrait;
+use PhpComp\LiteCache\Traits\ConfigAndEventAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 use Toolkit\DataParser\DataParserAwareTrait;
 
 /**
  * Class AbstractCache
- * @package Inhere\LiteCache
+ * @package PhpComp\LiteCache
  */
 abstract class AbstractCache implements CacheInterface
 {

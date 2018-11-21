@@ -6,14 +6,14 @@
  * Time: 16:48
  */
 
-namespace Inhere\LiteCache\Traits;
+namespace PhpComp\LiteCache\Traits;
 
-use Inhere\LiteCache\ConnectionException;
-use Inhere\LiteCache\InvalidArgumentException;
+use PhpComp\LiteCache\ConnectionException;
+use PhpComp\LiteCache\InvalidArgumentException;
 
 /**
  * Trait BasicRedisAwareTrait
- * @package Inhere\LiteCache\Traits
+ * @package PhpComp\LiteCache\Traits
  */
 trait BasicRedisAwareTrait
 {

@@ -6,14 +6,14 @@
  * Time: 19:10
  */
 
-namespace Inhere\LiteCache\Tests;
+namespace PhpComp\LiteCache\Tests;
 
-use Inhere\LiteCache\MemCache;
+use PhpComp\LiteCache\MemCache;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class MemCacheTest
- * @package Inhere\LiteCache\Tests
+ * @package PhpComp\LiteCache\Tests
  */
 class MemCacheTest extends TestCase
 {

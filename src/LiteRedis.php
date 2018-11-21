@@ -6,13 +6,13 @@
  * Time: 18:58
  */
 
-namespace Inhere\LiteCache;
+namespace PhpComp\LiteCache;
 
-use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
+use PhpComp\LiteCache\Traits\BasicRedisAwareTrait;
 
 /**
  * Class RedisClient
- * @package Inhere\LiteCache
+ * @package PhpComp\LiteCache
  * All the commands exposed by the client generally have the same signature as
  * described by the Redis documentation, but some of them offer an additional
  * and more friendly interface to ease programming which is described in the

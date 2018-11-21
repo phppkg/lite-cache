@@ -6,11 +6,11 @@
  * Time: 22:09
  */
 
-namespace Inhere\LiteCache;
+namespace PhpComp\LiteCache;
 
 /**
  * Class ConnectionException
- * @package Inhere\LiteCache
+ * @package PhpComp\LiteCache
  */
 class ConnectionException extends \RuntimeException
 {

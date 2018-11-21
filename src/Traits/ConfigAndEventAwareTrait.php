@@ -6,11 +6,11 @@
  * Time: 22:00
  */
 
-namespace Inhere\LiteCache\Traits;
+namespace PhpComp\LiteCache\Traits;
 
 /**
  * Trait ConfigAndEventAwareTrait
- * @package Inhere\LiteCache\Traits
+ * @package PhpComp\LiteCache\Traits
  */
 trait ConfigAndEventAwareTrait
 {

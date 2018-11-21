@@ -7,16 +7,16 @@
  * @from http://www.open-open.com/lib/view/open1372842855097.html
  */
 
-namespace Inhere\LiteCache;
+namespace PhpComp\LiteCache;
 
-use Inhere\LiteCache\Traits\ConfigAndEventAwareTrait;
+use PhpComp\LiteCache\Traits\ConfigAndEventAwareTrait;
 use Toolkit\DataParser\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class MemcacheClient
  * support \Memcache and \Memcached extension
- * @package Inhere\LiteCache
+ * @package PhpComp\LiteCache
  * @method string getVersion() 获取服务器池中所有服务器的版本信息
  */
 class MemCache implements CacheInterface
@@ -99,7 +99,7 @@ class MemCache implements CacheInterface
 
     /**
      * @return $this
-     * @throws \Inhere\LiteCache\ConnectionException
+     * @throws \PhpComp\LiteCache\ConnectionException
      */
     public function connect(): self
     {
@@ -135,7 +135,7 @@ class MemCache implements CacheInterface
 
     /**
      * reconnect
-     * @throws \Inhere\LiteCache\ConnectionException
+     * @throws \PhpComp\LiteCache\ConnectionException
      */
     public function reconnect()
     {
@@ -167,7 +167,7 @@ class MemCache implements CacheInterface
      * @param string $method
      * @param array $args
      * @return mixed
-     * @throws \Inhere\LiteCache\ConnectionException
+     * @throws \PhpComp\LiteCache\ConnectionException
      * @throws InvalidArgumentException
      */
     public function execute($method, ...$args)

@@ -1,6 +1,6 @@
 # simple cache client
 
-[![Packagist](https://img.shields.io/packagist/v/inhere/lite-cache.svg)](https://packagist.org/packages/inhere/lite-cache)
+[![Packagist](https://img.shields.io/packagist/v/php-comp/lite-cache.svg)](https://packagist.org/packages/php-comp/lite-cache)
 
 simple cache client for memcached, redis.
 
@@ -9,14 +9,13 @@ simple cache client for memcached, redis.
 ## 项目地址
 
 - **github** https://github.com/inhere/php-lite-cache.git
-- **git@osc** https://git.oschina.net/inhere/php-lite-cache.git
 
 ## 安装
 
 - composer 命令
 
 ```php
-composer require inhere/lite-cache
+composer require php-comp/lite-cache
 ```
 
 - composer.json
@@ -24,7 +23,7 @@ composer require inhere/lite-cache
 ```json
 {
     "require": {
-        "inhere/lite-cache": "dev-master"
+        "php-comp/lite-cache": "dev-master"
     }
 }
 ```

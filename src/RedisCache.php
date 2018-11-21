@@ -6,15 +6,15 @@
  * Time: 12:59
  */
 
-namespace Inhere\LiteCache;
+namespace PhpComp\LiteCache;
 
-use Inhere\LiteCache\Traits\BasicRedisAwareTrait;
+use PhpComp\LiteCache\Traits\BasicRedisAwareTrait;
 use Toolkit\DataParser\DataParserAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class RedisCache
- * @package Inhere\LiteCache
+ * @package PhpComp\LiteCache
  * @method int exists($key)
  */
 class RedisCache implements CacheInterface
@@ -84,7 +84,7 @@ class RedisCache implements CacheInterface
 
     /**
      * {@inheritdoc}
-     * @throws \Inhere\LiteCache\InvalidArgumentException
+     * @throws \PhpComp\LiteCache\InvalidArgumentException
      * @throws InvalidArgumentException
      */
     public function set($key, $value, $ttl = null)
@@ -117,7 +117,7 @@ class RedisCache implements CacheInterface
 
     /**
      * {@inheritdoc}
-     * @throws \Inhere\LiteCache\InvalidArgumentException
+     * @throws \PhpComp\LiteCache\InvalidArgumentException
      */
     public function clear()
     {

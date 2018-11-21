@@ -6,11 +6,11 @@
  * Time: 22:12
  */
 
-namespace Inhere\LiteCache;
+namespace PhpComp\LiteCache;
 
 /**
  * Class InvalidArgumentException
- * @package Inhere\LiteCache
+ * @package PhpComp\LiteCache
  */
 class InvalidArgumentException extends \Exception implements \Psr\SimpleCache\InvalidArgumentException
 {

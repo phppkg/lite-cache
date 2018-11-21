@@ -6,14 +6,14 @@
  * Time: 20:11
  */
 
-namespace Inhere\LiteCache\Tests;
+namespace PhpComp\LiteCache\Tests;
 
-use Inhere\LiteCache\RedisCache;
+use PhpComp\LiteCache\RedisCache;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class RedisCacheTest
- * @package Inhere\LiteCache\Tests
+ * @package PhpComp\LiteCache\Tests
  */
 class RedisCacheTest extends TestCase
 {
