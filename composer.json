@@ -23,7 +23,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Inhere\\LiteCache\\": "src/"
+      "PhpComp\\LiteCache\\": "src/"
     }
   },
   "suggest": {
